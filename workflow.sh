@@ -10,7 +10,7 @@ TMP_LOG_FILE="/tmp/tmp_`date +%Y%M%S`"
 
 ###GitHub authentication config
 GITHUB_NAME="memeda"
-GITHUB_PASSWD="....."
+GITHUB_PASSWD="0"
 AUTH="${GITHUB_NAME}:${GITHUB_PASSWD}@"
 
 ### Repository config
@@ -110,6 +110,10 @@ function commit_and_push_repository_update()
 }
 function main()
 {
+    read -p "user name and passwd should be specified. is it ready?[y/n]" ans
+    if [ "$ans" != "y" ];then
+        logging_error "Exit !"
+    fi
     ready_all_repositories
     sync_dependency_repositories $LTP_REPO_PATH $LTPCWS_REPO_PATH $LTP_SUBPROJECT_DEPENDENCY_PATH $LTPCWS_KEEP_STABLE_PATH
     commit_and_push_repository_update $LTPCWS_REPO_PATH
