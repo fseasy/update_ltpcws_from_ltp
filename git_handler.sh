@@ -12,6 +12,15 @@ function logging_error()
 {
     echo $@ >> /dev/stderr
 }
+
+function set_path_to_root()
+{
+    if [ "$ROOT_PATH" = "" ];then
+        logging_error "ROOT PATH has not been set . set to `pwd`"
+        ROOT_PATH="`pwd`"
+    fi
+    cd "$ROOT_PATH"
+}
 ## Git handler
 
 function git_error_handler()
@@ -25,6 +34,7 @@ function clone_repository()
 {
     repo_path=$1
     repo_url=$2
+    set_path_to_root
     git clone $repo_url $repo_path
     if [ $? -eq 0 ]; then
         logging_error "clone `basename $repo_path` repository done." 
@@ -39,7 +49,7 @@ function pull_repository()
 {
     repo_path=$1
     local CUR_PATH="`pwd`"
-    cd $repo_path
+    set_path_to_root ; cd $repo_path
     git pull origin master
     local ret=$?
     if [ $ret -ne 0 ];then
@@ -56,7 +66,7 @@ function add_repository_remote_upstream()
     repo_path="$1"
     upstream_url="$2"
     CUR_PATH="`pwd`"
-    cd "$repo_path"
+    set_path_to_root ; cd "$repo_path"
     remote_list="`git remote`" 
     find_upstream_rst="`echo "$remote_list" | grep upstream | tr -d [:space:]`"
     has_set_upstream=0
@@ -94,7 +104,7 @@ function sync_to_upstream()
     add_repository_remote_upstream $repo_path $upstream_url 
     ret=0
     if [ $ret -eq 0 ]; then
-        cd "$repo_path"
+        set_path_to_root ; cd "$repo_path"
         git fetch upstream
         git checkout master
         git merge upstream/master
@@ -114,7 +124,7 @@ function push_repository()
 {
     repo_path=$1
     CUR_PATH="`pwd`"
-    cd $repo_path
+    set_path_to_root ; cd $repo_path
     git push origin master
     if [ $? -eq 0 ];then
         logging_error "push repository `basename $repo_path` done."
@@ -130,6 +140,7 @@ function init_repository()
     repo_path=$1
     repo_url=$2
     CUR_PATH="`pwd`"
+    set_path_to_root ;
     if [ ! -e $repo_path ] ;then
         clone_repository  "$repo_path" "$repo_url"
     else
