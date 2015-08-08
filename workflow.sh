@@ -1,69 +1,57 @@
 #/bin/sh
-
-## Static Config
-
-###Path config
-ROOT_PATH="`pwd`"
 PRE_PATH="."
-REPOSITORY_PATH="$PRE_PATH/repositories"
-TMP_LOG_FILE="/tmp/tmp_`date +%Y%M%S`"
-
-###GitHub authentication config
-GITHUB_NAME="memeda"
-GITHUB_PASSWD="0"
-AUTH="${GITHUB_NAME}:${GITHUB_PASSWD}@"
-
-### Repository config
-LTP_REPO_NAME="ltp"
-LTP_REPO_PATH="$REPOSITORY_PATH/$LTP_REPO_NAME"
-LTP_REPO_URL="https://${AUTH}github.com/memeda/ltp"
-LTP_REPO_UPSTREAM_URL="https://github.com/HIT-SCIR/ltp"
-
-LTPCWS_REPO_NAME="ltpcws"
-LTPCWS_REPO_PATH="$REPOSITORY_PATH/$LTPCWS_REPO_NAME"
-LTPCWS_REPO_URL="https://${AUTH}github.com/memeda/ltp-cws"
-LTPCWS_REPO_UPSTREAM_URL="https://github.com/HIT-SCIR/ltp-cws"
-
-### dependency file and keep stable file config
-LTP_SUBPROJECT_DEPENDENCY_PATH="$LTP_REPO_PATH/subproject.d.json"
-LTPCWS_KEEP_STABLE_PATH="$LTPCWS_REPO_PATH/keep_stable.txt"
 
 ### scripts config
+REPO_CONFIG="$PRE_PATH/repo_config.sh"
 SYNC_SCRIPT="python $PRE_PATH/sync_project.py "
 GIT_HANDLER_SCRIPT="$PRE_PATH/git_handler.sh"
 
-### workflow  error config
-GIT_NO_ERROR="true"
+### include 
+#repo_config
+. "$REPO_CONFIG"
+# global variable : REPOSITORY_PATH , TMP_LOG_FILE , GITHUB_NAME ,
+#                   GITHUB_PASSWD , AUTH , LTP_REPO_NAME ,
+#                   LTP_REPO_PATH , LTP_REPO_URL , 
+#                   LTP_REPO_UPSTREAM_URL ,
+#                   LTPCWS_REPO_NAME , LTPCWS_REPO_PATH ,
+#                   LTPCWS_REPO_URL , LTPCWS_REPO_UPSTREAM_URL ,
+#                   LTP_SUBPROJECT_DEPENDENCY_PATH ,
+#                   LTPCWS_KEEP_STABLE_PATH  
 
 # Git handler
 . "$GIT_HANDLER_SCRIPT"
 
 # function logging_error(err_msg)
+# function set_path_to_root()
 # function clone_repository(repo_url , repo_path)
 # function pull_repository(repo_path)
 # function sync_to_upstream(repo_path , upstream_url)
 # function push_repository(repo_path)
 # function init_repository(repo_path , repo_url)
-
+# function sync_repository(repo_path , repo_url)
 
 function ready_all_repositories()
 {
+    set_path_to_root
     mkdir -p $REPOSITORY_PATH
     init_repository $LTP_REPO_PATH $LTP_REPO_URL
     init_repository $LTPCWS_REPO_PATH $LTPCWS_REPO_URL
-    sync_to_upstream $LTP_REPO_PATH $LTP_REPO_UPSTREAM_URL
+    sync_repository $LTP_REPO_PATH $LTP_REPO_UPSTREAM_URL
     #sync_to_upstream $LTPCWS_REPO_PATH $LTPCWS_REPO_UPSTREAM_URL
     pull_repository $LTPCWS_REPO_PATH 
 }
 
 function sync_dependency_repositories()
 {
+    
     src_repo_path=$1
     dst_repo_path=$2
     dep_file=$3
     keep_stable_file=$4
+    set_path_to_root
     if [[ ! -e "$src_repo_path" ]] || [[ ! -e "$dst_repo_path" ]] || [[ ! -e "$dep_file" ]] ; then
         logging_error "At least one of the path ($src_repo_path , $dst_repo_path , $dep_file ) is not exists"
+        logging_error "Current location : `pwd`"
         logging_error "sync dependency repositories Exit!"
         exit 1
     fi
@@ -85,6 +73,7 @@ function commit_and_push_repository_update()
 {
     repo_path=$1
     CUR_PATH="`pwd`"
+    set_path_to_root
     cd "$repo_path"
     git add --all ./ >$TMP_LOG_FILE 2>&1
     if [ $? -ne 0 ];then
