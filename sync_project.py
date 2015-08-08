@@ -203,6 +203,7 @@ def sync_cmakelists(dep_s , dst_root_path) :
             logging.warning("read cmakelists file : %s , or write file : %s failed . details: %s" %(fpath , ftmppath , e))
         subdir_pattern = re.compile(r".*?add_subdirectory.*?\((.*?)\).*")
         subdir_root_path = os.path.split(fpath)[0]
+        project_name_pattern = re.compile(r'project\s+\("LTP.*')
         for line in fpi :
             match_rst = subdir_pattern.match(line)
             if match_rst is not None and len(match_rst.groups()) > 0 :
@@ -213,6 +214,9 @@ def sync_cmakelists(dep_s , dst_root_path) :
                         fpo.write(line)
                     else :
                         logging.info("cmakelists %s : remove line : %s" %(fpath,line.strip()))
+            elif project_name_pattern.match(line) :
+                fpo.write('project ("LTP - Chinese Word Segmentation Component.")\n')
+                logging.info("cmakelists %s : change project name." %(fpath))
             else :
                 fpo.write(line)
         fpi.close()

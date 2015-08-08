@@ -28,7 +28,7 @@ GIT_HANDLER_SCRIPT="$PRE_PATH/git_handler.sh"
 # function sync_to_upstream(repo_path , upstream_url)
 # function push_repository(repo_path)
 # function init_repository(repo_path , repo_url)
-# function sync_repository(repo_path , repo_url)
+# function sync_repository(repo_path , repo_upstream_url)
 
 function ready_all_repositories()
 {
@@ -99,9 +99,16 @@ function commit_and_push_repository_update()
 }
 function main()
 {
-    read -p "user name and passwd should be specified. is it ready?[y/n]" ans
+    cat >> /dev/stderr <<!
+---------------Update LTPCWS from LTP-------------
+User name and passwd(optional) , LTP and LTPCWS repositories local path and remote url 
+should be specified.  Is it ready?
+[y/n]"
+!
+    read  ans
     if [ "$ans" != "y" ];then
         logging_error "Exit !"
+        exit 1
     fi
     ready_all_repositories
     sync_dependency_repositories $LTP_REPO_PATH $LTPCWS_REPO_PATH $LTP_SUBPROJECT_DEPENDENCY_PATH $LTPCWS_KEEP_STABLE_PATH

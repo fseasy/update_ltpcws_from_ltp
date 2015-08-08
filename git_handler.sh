@@ -8,7 +8,7 @@
 # function sync_to_upstream(repo_path , upstream_url)
 # function push_repository(repo_path)
 # function init_repository(repo_path , repo_url)
-# function sync_repository(repo_path , repo_url)
+# function sync_repository(repo_path , repo_upstream_url)
 function logging_error()
 {
     echo $@ >> /dev/stderr
